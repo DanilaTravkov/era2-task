@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GenerationTask } from "@/entities/generation-task";
 import { MAX_CONCURRENT, queueInitialState, queueReducer } from "../queueReducer";
 import type { QueueState } from "../types";
@@ -30,8 +30,12 @@ function state(tasks: GenerationTask[]): QueueState {
 }
 
 describe("queueReducer", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
   it("hydrates restored running tasks through the queued flow and respects MAX_CONCURRENT = 2", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.9);
     const initialTasks = [
       task({
         id: "stored-running",
@@ -50,8 +54,6 @@ describe("queueReducer", () => {
     expect(next.tasks.find((item) => item.id === "old-queued")?.status).toBe("running");
     expect(next.tasks.find((item) => item.id === "stored-running")?.status).toBe("running");
     expect(next.tasks.find((item) => item.id === "new-queued")?.status).toBe("queued");
-
-    vi.restoreAllMocks();
   });
 
   it("advances running task progress to done and immediately fills the freed slot FIFO", () => {
@@ -87,12 +89,12 @@ describe("queueReducer", () => {
     const next = queueReducer(current, {
       type: "queue/engine-tick",
       now,
-      updates: [{ taskId: "running-1", progressDelta: 1, fail: true, error: "Недостаточно кредитов" }],
+      updates: [{ taskId: "running-1", progressDelta: 1, fail: true, error: "Insufficient credits" }],
     });
 
     expect(next.tasks.find((item) => item.id === "running-1")).toMatchObject({
       status: "failed",
-      error: "Недостаточно кредитов",
+      error: "Insufficient credits",
       completedAt: now,
     });
     expect(next.tasks.find((item) => item.id === "queued-1")?.status).toBe("running");
@@ -101,7 +103,7 @@ describe("queueReducer", () => {
   it("supports cancel, retry, delete, and clear-done user actions", () => {
     const current = state([
       task({ id: "running-1", status: "running", progress: 42 }),
-      task({ id: "failed-1", status: "failed", progress: 66, error: "Превышено время ожидания" }),
+      task({ id: "failed-1", status: "failed", progress: 66, error: "Timeout exceeded" }),
       task({ id: "done-1", status: "done", progress: 100 }),
       task({ id: "queued-1", status: "queued" }),
     ]);
@@ -126,5 +128,32 @@ describe("queueReducer", () => {
     const cleared = queueReducer(deleted, { type: "queue/clear-done" });
     expect(cleared.tasks.some((item) => item.status === "done")).toBe(false);
   });
-});
 
+  it("keeps reducer calls pure without timers, storage, network, or state mutation", () => {
+    const current = state([
+      task({ id: "running-1", status: "running", progress: 10 }),
+      task({ id: "queued-1", status: "queued", createdAt: "2026-06-24T09:10:00.000Z" }),
+    ]);
+    const snapshot = structuredClone(current);
+    const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
+    const setIntervalSpy = vi.spyOn(globalThis, "setInterval");
+    const getItemSpy = vi.spyOn(Storage.prototype, "getItem");
+    const setItemSpy = vi.spyOn(Storage.prototype, "setItem");
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const next = queueReducer(current, {
+      type: "queue/engine-tick",
+      now,
+      updates: [{ taskId: "running-1", progressDelta: 15 }],
+    });
+
+    expect(next).not.toBe(current);
+    expect(current).toEqual(snapshot);
+    expect(setTimeoutSpy).not.toHaveBeenCalled();
+    expect(setIntervalSpy).not.toHaveBeenCalled();
+    expect(getItemSpy).not.toHaveBeenCalled();
+    expect(setItemSpy).not.toHaveBeenCalled();
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+});
