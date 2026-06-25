@@ -1,8 +1,9 @@
 export { MAX_CONCURRENT, queueInitialState, queueReducer } from "./model/queueReducer";
 export { QueueProvider } from "./model/QueueProvider";
 export { QUEUE_TICK_MS, buildQueueTick, useQueueEngine } from "./model/queueEngine";
-export { selectQueueStats, selectVisibleTasks } from "./model/selectors";
+export { selectActiveTasks, selectQueueStats, selectVisibleTasks } from "./model/selectors";
 export { useQueue } from "./model/useQueue";
+export { GenerationStatusBar } from "./ui/GenerationStatusBar";
 export { ProgressBar } from "./ui/ProgressBar";
 export { QueueStats } from "./ui/QueueStats";
 export { QueueToolbar } from "./ui/QueueToolbar";

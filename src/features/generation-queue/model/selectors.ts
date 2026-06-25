@@ -3,6 +3,10 @@ import type { QueueControls, QueueStatsSnapshot } from "./types";
 
 const byNewest = (left: GenerationTask, right: GenerationTask) => right.createdAt.localeCompare(left.createdAt);
 const byOldest = (left: GenerationTask, right: GenerationTask) => left.createdAt.localeCompare(right.createdAt);
+const byActivePriority = (left: GenerationTask, right: GenerationTask) => {
+  if (left.status !== right.status) return left.status === "running" ? -1 : 1;
+  return left.createdAt.localeCompare(right.createdAt);
+};
 
 export function selectQueueStats(tasks: GenerationTask[]): QueueStatsSnapshot {
   return tasks.reduce(
@@ -26,4 +30,10 @@ export function selectVisibleTasks(tasks: GenerationTask[], controls: QueueContr
       return byStatus && bySearch;
     })
     .sort(controls.sort === "oldest" ? byOldest : byNewest);
+}
+
+export function selectActiveTasks(tasks: GenerationTask[]): GenerationTask[] {
+  return tasks
+    .filter((task) => task.status === "queued" || task.status === "running")
+    .sort(byActivePriority);
 }

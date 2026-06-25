@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { GenerationTask } from "@/entities/generation-task";
-import { selectQueueStats, selectVisibleTasks } from "../selectors";
+import { selectActiveTasks, selectQueueStats, selectVisibleTasks } from "../selectors";
 import type { QueueControls } from "../types";
 
 function task(overrides: Partial<GenerationTask> = {}): GenerationTask {
@@ -26,6 +26,13 @@ const baseControls: QueueControls = {
 
 describe("generation queue selectors", () => {
   const tasks: GenerationTask[] = [
+    task({
+      id: "old-running",
+      status: "running",
+      prompt: "Voiceover script",
+      createdAt: "2026-06-24T09:05:00.000Z",
+      progress: 30,
+    }),
     task({
       id: "new-running",
       status: "running",
@@ -55,10 +62,19 @@ describe("generation queue selectors", () => {
   it("returns queued/running/done/failed counters for queue summary cards", () => {
     expect(selectQueueStats(tasks)).toEqual({
       queued: 2,
-      running: 1,
+      running: 2,
       done: 1,
       failed: 1,
     });
+  });
+
+  it("returns active tasks with running first and queued tasks in FIFO order", () => {
+    expect(selectActiveTasks(tasks).map((item) => item.id)).toEqual([
+      "old-running",
+      "new-running",
+      "old-queued",
+      "second-queued",
+    ]);
   });
 
   it("filters by status and sorts by newest or oldest creation time", () => {

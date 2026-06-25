@@ -1,15 +1,7 @@
 import { useMemo, useState } from "react";
-import { EmptyState, ErrorState, LoadingState, QueueProvider, QueueStats, QueueToolbar, TaskCard, TaskRow, selectQueueStats, selectVisibleTasks, useQueue, type QueueControls } from "@/features/generation-queue";
+import { EmptyState, ErrorState, LoadingState, QueueStats, QueueToolbar, TaskCard, TaskRow, selectQueueStats, selectVisibleTasks, useQueue, type QueueControls } from "@/features/generation-queue";
 
 export function GenerationQueue() {
-  return (
-    <QueueProvider>
-      <GenerationQueueContent />
-    </QueueProvider>
-  );
-}
-
-function GenerationQueueContent() {
   const { state, cancelTask, retryTask, deleteTask, retryInitialLoad } = useQueue();
   const [controls, setControls] = useState<QueueControls>({ status: "all", sort: "newest", search: "" });
   const stats = useMemo(() => selectQueueStats(state.tasks), [state.tasks]);
