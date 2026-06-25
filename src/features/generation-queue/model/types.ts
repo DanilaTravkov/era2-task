@@ -1,4 +1,4 @@
-import type { GenerationTask } from "@/entities/generation-task";
+import type { GenerationTask, TaskStatus } from "@/entities/generation-task";
 
 export interface QueueState {
   tasks: GenerationTask[];
@@ -12,6 +12,22 @@ export interface QueueTickUpdate {
   progressDelta: number;
   fail?: boolean;
   error?: string;
+}
+
+export type QueueStatusFilter = Extract<TaskStatus, "queued" | "running" | "done" | "failed"> | "all";
+export type QueueSort = "newest" | "oldest";
+
+export interface QueueControls {
+  status: QueueStatusFilter;
+  sort: QueueSort;
+  search: string;
+}
+
+export interface QueueStatsSnapshot {
+  queued: number;
+  running: number;
+  done: number;
+  failed: number;
 }
 
 export type QueueAction =
