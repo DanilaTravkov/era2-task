@@ -1,37 +1,45 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GenerationTask } from "@/entities/generation-task";
+import { MAX_CONCURRENT } from "../queueReducer";
 import { QueueProvider } from "../QueueProvider";
 import { useQueue } from "../useQueue";
 
-const storageKey = "era2:generation-queue:v1";
+const key = "era2:generation-queue:v1";
 
-function task(overrides: Partial<GenerationTask> = {}): GenerationTask {
-  return {
-    id: "task-1",
-    type: "image",
-    model: "GPT-4o",
-    prompt: "Generate a product image",
-    status: "queued",
-    progress: 0,
-    createdAt: "2026-06-24T09:00:00.000Z",
-    updatedAt: "2026-06-24T09:00:00.000Z",
-    credits: 12,
-    ...overrides,
-  };
-}
+vi.mock("../queueEngine", async (original) => ({
+  ...(await original<typeof import("../queueEngine")>()),
+  useQueueEngine: vi.fn(),
+}));
 
-function QueueProbe() {
+const task = (overrides: Partial<GenerationTask> = {}): GenerationTask => ({
+  id: "task-1",
+  type: "image",
+  model: "GPT-4o",
+  prompt: "Generate a product image",
+  status: "queued",
+  progress: 0,
+  createdAt: "2026-06-24T09:00:00.000Z",
+  updatedAt: "2026-06-24T09:00:00.000Z",
+  credits: 12,
+  ...overrides,
+});
+const advance = async (ms: number) => act(async () => vi.advanceTimersByTime(ms));
+const stored = () => JSON.parse(localStorage.getItem(key) ?? "[]") as GenerationTask[];
+
+function Probe() {
   const queue = useQueue();
-
+  const ids = queue.state.tasks.map((item) => `${item.id}:${item.status}`).join(",");
+  const running = queue.state.tasks.filter((item) => item.status === "running").length;
   return (
     <div>
       <output aria-label="loading">{String(queue.state.loading)}</output>
       <output aria-label="hydrated">{String(queue.state.hydrated)}</output>
-      <output aria-label="ids">{queue.state.tasks.map((item) => `${item.id}:${item.status}`).join(",")}</output>
-      <button type="button" onClick={() => queue.cancelTask("persist-running")}>
-        cancel
-      </button>
+      <output aria-label="error">{queue.state.error ?? ""}</output>
+      <output aria-label="ids">{ids}</output>
+      <output aria-label="running">{running}</output>
+      <button onClick={() => queue.cancelTask("persist-a")}>cancel</button>
+      <button onClick={queue.retryInitialLoad}>retry load</button>
     </div>
   );
 }
@@ -39,67 +47,52 @@ function QueueProbe() {
 describe("QueueProvider persistence", () => {
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
     localStorage.clear();
   });
 
-  it("restores stored tasks from localStorage and normalizes active work through the queue reducer", async () => {
+  it("delays hydration for 600ms and restores normalized localStorage tasks", async () => {
     vi.useFakeTimers();
     localStorage.setItem(
-      storageKey,
+      key,
       JSON.stringify([
-        task({
-          id: "persist-running",
-          status: "running",
-          progress: 50,
-          createdAt: "2026-06-24T09:00:00.000Z",
-        }),
-        task({
-          id: "persist-queued",
-          status: "queued",
-          createdAt: "2026-06-24T09:05:00.000Z",
-        }),
+        task({ id: "persist-a", status: "running", createdAt: "2026-06-24T09:00:00.000Z" }),
+        task({ id: "persist-b", status: "running", createdAt: "2026-06-24T09:05:00.000Z" }),
+        task({ id: "persist-c", status: "running", createdAt: "2026-06-24T09:10:00.000Z" }),
       ]),
     );
 
-    render(
-      <QueueProvider>
-        <QueueProbe />
-      </QueueProvider>,
-    );
-
-    await act(async () => {
-      vi.advanceTimersByTime(600);
-    });
-
-    await waitFor(() => expect(screen.getByLabelText("hydrated").textContent).toBe("true"));
-    expect(screen.getByLabelText("ids").textContent).toContain("persist-running:running");
-    expect(screen.getByLabelText("ids").textContent).toContain("persist-queued:running");
+    render(<QueueProvider><Probe /></QueueProvider>);
+    expect(screen.getByLabelText("loading").textContent).toBe("true");
+    await advance(599);
+    expect(screen.getByLabelText("hydrated").textContent).toBe("false");
+    await advance(1);
+    expect(screen.getByLabelText("hydrated").textContent).toBe("true");
+    expect(screen.getByLabelText("running").textContent).toBe(String(MAX_CONCURRENT));
+    expect(screen.getByLabelText("ids").textContent).toContain("persist-c:queued");
   });
 
-  it("persists queue changes after hydration without a backend", async () => {
+  it("persists queue changes only after hydration", async () => {
     vi.useFakeTimers();
-    localStorage.setItem(
-      storageKey,
-      JSON.stringify([task({ id: "persist-running", status: "running", progress: 35 })]),
-    );
+    localStorage.setItem(key, JSON.stringify([task({ id: "persist-a", status: "running" })]));
+    render(<QueueProvider><Probe /></QueueProvider>);
 
-    render(
-      <QueueProvider>
-        <QueueProbe />
-      </QueueProvider>,
-    );
+    await advance(599);
+    expect(stored()[0].status).toBe("running");
+    await advance(1);
+    fireEvent.click(screen.getByRole("button", { name: "cancel" }));
+    expect(stored().find((item) => item.id === "persist-a")?.status).toBe("canceled");
+  });
 
-    await act(async () => {
-      vi.advanceTimersByTime(600);
-    });
-    await waitFor(() => expect(screen.getByLabelText("hydrated").textContent).toBe("true"));
+  it("shows a controlled init error and retries successfully", async () => {
+    vi.useFakeTimers();
+    render(<QueueProvider initialLoadShouldFail><Probe /></QueueProvider>);
 
-    screen.getByRole("button", { name: "cancel" }).click();
-
-    await waitFor(() => {
-      const stored = JSON.parse(localStorage.getItem(storageKey) ?? "[]") as GenerationTask[];
-      expect(stored.find((item) => item.id === "persist-running")?.status).toBe("canceled");
-    });
+    await advance(600);
+    expect(screen.getByLabelText("error").textContent).not.toBe("");
+    fireEvent.click(screen.getByRole("button", { name: "retry load" }));
+    await advance(600);
+    expect(screen.getByLabelText("error").textContent).toBe("");
+    expect(screen.getByLabelText("hydrated").textContent).toBe("true");
   });
 });
-
