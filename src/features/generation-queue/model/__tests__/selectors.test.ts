@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { GenerationTask } from "@/entities/generation-task";
-import {
-  selectActiveTasks,
-  selectAverageActiveProgress,
-  selectQueuePosition,
-  selectQueueStats,
-  selectVisibleTasks,
-} from "../selectors";
+import { selectQueueStats, selectVisibleTasks } from "../selectors";
 import type { QueueControls } from "../types";
 
 function task(overrides: Partial<GenerationTask> = {}): GenerationTask {
@@ -26,7 +20,6 @@ function task(overrides: Partial<GenerationTask> = {}): GenerationTask {
 
 const baseControls: QueueControls = {
   status: "all",
-  type: "all",
   sort: "newest",
   search: "",
 };
@@ -59,7 +52,7 @@ describe("generation queue selectors", () => {
     }),
   ];
 
-  it("returns reactive counters for queue summary cards", () => {
+  it("returns queued/running/done/failed counters for queue summary cards", () => {
     expect(selectQueueStats(tasks)).toEqual({
       queued: 2,
       running: 1,
@@ -68,39 +61,25 @@ describe("generation queue selectors", () => {
     });
   });
 
-  it("selects active tasks and average progress for the global status bar", () => {
-    expect(selectActiveTasks(tasks).map((item) => item.id)).toEqual([
-      "new-running",
-      "old-queued",
+  it("filters by status and sorts by newest or oldest creation time", () => {
+    expect(selectVisibleTasks(tasks, { ...baseControls, status: "queued", sort: "newest" }).map((item) => item.id)).toEqual([
       "second-queued",
-    ]);
-    expect(selectAverageActiveProgress(tasks)).toBe(20);
-  });
-
-  it("filters by status, searches prompt/model text, and sorts by creation time", () => {
-    expect(selectVisibleTasks(tasks, { ...baseControls, search: "image", sort: "newest" }).map((item) => item.id)).toEqual([
-      "failed",
+      "old-queued",
     ]);
     expect(selectVisibleTasks(tasks, { ...baseControls, status: "queued", sort: "oldest" }).map((item) => item.id)).toEqual([
       "old-queued",
       "second-queued",
     ]);
-    expect(selectQueuePosition(tasks, "second-queued")).toBe(2);
   });
 
-  it("filters by generation type and supports status/progress sorting modes", () => {
-    expect(selectVisibleTasks(tasks, { ...baseControls, type: "audio" }).map((item) => item.id)).toEqual([
-      "second-queued",
-    ]);
-    expect(selectVisibleTasks(tasks, { ...baseControls, sort: "status" }).map((item) => item.id)).toEqual([
-      "new-running",
-      "old-queued",
-      "second-queued",
+  it("searches prompt text case-insensitively and preserves selected sort order", () => {
+    expect(selectVisibleTasks(tasks, { ...baseControls, search: "IMAGE", sort: "newest" }).map((item) => item.id)).toEqual([
       "failed",
-      "done",
-      "canceled",
     ]);
-    expect(selectVisibleTasks(tasks, { ...baseControls, sort: "progress" })[0].id).toBe("done");
+    expect(selectVisibleTasks(tasks, { ...baseControls, search: "audio", sort: "oldest" }).map((item) => item.id)).toEqual([
+      "second-queued",
+      "done",
+    ]);
   });
 });
 
