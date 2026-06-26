@@ -1,5 +1,5 @@
 import { Link } from "@/shared/routing";
-import { Clock, Menu, Moon, Search, Sun } from "lucide-react";
+import { Clock, ListChecks, Menu, Moon, Search, Sun } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useTheme } from "@/features/theme-switcher";
 import { useAuth } from "@/features/auth";
@@ -83,6 +83,21 @@ export function Header({ onToggleSidebar, showBurger = true }: HeaderProps) {
         >
           <Search className="h-4 w-4" />
         </button>
+
+        <Link
+          to="/queue"
+          className={cn(iconBtn, "lg:hidden")}
+          aria-label="Открыть очередь генераций"
+        >
+          <ListChecks className="h-4 w-4" />
+        </Link>
+        <Link
+          to="/queue"
+          className="hidden lg:inline-flex items-center gap-2 h-9 px-3 rounded-full text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+        >
+          <ListChecks className="h-3.5 w-3.5" />
+          Очередь
+        </Link>
 
         {/* History (desktop) */}
         <Link
