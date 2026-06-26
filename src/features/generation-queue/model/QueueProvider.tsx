@@ -21,9 +21,10 @@ export const QueueContext = createContext<QueueContextValue | null>(null);
 const cloneSeedTasks = () => generationTaskSeed.map((task) => ({ ...task }));
 const isActiveTask = (task: GenerationTask) => task.status === "queued" || task.status === "running";
 
-function withMinimumActiveTasks(tasks: GenerationTask[]) {
+function withCompleteSeedTasks(tasks: GenerationTask[]) {
   const next = tasks.map((task) => ({ ...task }));
-  const activeSeeds = cloneSeedTasks().filter(isActiveTask);
+  const seeds = cloneSeedTasks();
+  const activeSeeds = seeds.filter(isActiveTask);
 
   for (const seed of activeSeeds) {
     if (next.filter(isActiveTask).length >= MIN_ACTIVE_QUEUE_TASKS) break;
@@ -36,12 +37,10 @@ function withMinimumActiveTasks(tasks: GenerationTask[]) {
     }
   }
 
-  if (next.filter(isActiveTask).length >= MIN_ACTIVE_QUEUE_TASKS) return next;
-
   const existingIds = new Set(next.map((task) => task.id));
   return [
     ...next,
-    ...activeSeeds.filter((task) => !existingIds.has(task.id)).slice(0, MIN_ACTIVE_QUEUE_TASKS),
+    ...seeds.filter((task) => !existingIds.has(task.id)),
   ];
 }
 
@@ -84,7 +83,7 @@ export function QueueProvider({ children, initialLoadShouldFail = false }: Queue
       }
       dispatch({
         type: "queue/load-success",
-        tasks: withMinimumActiveTasks(readStoredTasks() ?? cloneSeedTasks()),
+        tasks: withCompleteSeedTasks(readStoredTasks() ?? cloneSeedTasks()),
         now: new Date().toISOString(),
       });
     }, HYDRATION_DELAY_MS);

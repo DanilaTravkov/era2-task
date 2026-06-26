@@ -86,15 +86,26 @@ describe("QueueProvider persistence", () => {
     expect(stored().find((item) => item.id === "persist-a")?.status).toBe("canceled");
   });
 
-  it("tops up stale persisted queues to more than six active tasks", async () => {
+  it("completes stale persisted queues with the full seed dataset", async () => {
     vi.useFakeTimers();
-    localStorage.setItem(key, JSON.stringify([task({ id: "persist-a", status: "running" })]));
+    localStorage.setItem(
+      key,
+      JSON.stringify(
+        Array.from({ length: 10 }, (_, index) =>
+          task({
+            id: `gen-${1001 + index}`,
+            status: index < 2 ? "running" : "queued",
+            createdAt: `2026-06-24T09:${String(index).padStart(2, "0")}:00.000Z`,
+          }),
+        ),
+      ),
+    );
 
     render(<QueueProvider><Probe /></QueueProvider>);
 
     await advance(600);
     expect(activeCount(screen.getByLabelText("ids").textContent ?? "")).toBeGreaterThan(6);
-    expect(stored().length).toBeGreaterThan(6);
+    expect(stored()).toHaveLength(21);
   });
 
   it("reactivates stale completed seed tasks for the live demo flow", async () => {
