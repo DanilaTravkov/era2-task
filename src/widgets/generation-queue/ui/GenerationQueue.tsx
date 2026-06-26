@@ -4,8 +4,9 @@ import { EmptyState, ErrorState, LoadingState, QueueStats, QueueToolbar, TaskCar
 import { Checkbox } from "@/shared/ui/checkbox";
 
 const SKIP_DELETE_CONFIRM_KEY = "era2:generation-queue:skip-delete-confirm";
-const MOCK_QUEUE_PAGE_SIZE = 10;
+const MOCK_QUEUE_PAGE_SIZE = 7;
 const MOCK_QUEUE_REQUEST_MS = 300;
+const SCROLL_LOAD_OFFSET_PX = 32;
 const shortTaskDescription = (task: GenerationTask) => task.prompt.split(":")[0]?.trim() || task.prompt;
 
 function requestMockQueuePage(currentCount: number, totalCount: number) {
@@ -62,6 +63,17 @@ export function GenerationQueue() {
     setRenderedCount(Math.min(MOCK_QUEUE_PAGE_SIZE, visibleTasks.length));
     setPageLoading(false);
   }, [controls.search, controls.sort, controls.status, visibleTasks.length]);
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollBottom = window.scrollY + window.innerHeight;
+      const pageBottom = document.documentElement.scrollHeight - SCROLL_LOAD_OFFSET_PX;
+
+      if (scrollBottom >= pageBottom) void loadNextPage();
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loadNextPage]);
   return (
     <section className="min-h-screen bg-[#0e0b0a] px-3 py-6 text-[#f6efe9] sm:px-6 sm:py-8 lg:px-10">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 sm:gap-6">
@@ -102,18 +114,7 @@ export function GenerationQueue() {
                     <TaskCard key={task.id} task={task} queuePosition={queuePositions.get(task.id)} onCancel={cancelTask} onRetry={retryTask} onDelete={requestDelete} />
                   ))}
                 </div>
-                {canLoadMore && (
-                  <div className="flex justify-center">
-                    <button
-                      type="button"
-                      onClick={loadNextPage}
-                      disabled={pageLoading}
-                      className="queue-focus rounded-md border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-[#f6efe9] hover:border-[#e85420]/40 disabled:cursor-wait disabled:opacity-60"
-                    >
-                      {pageLoading ? "Загрузка..." : "Показать ещё 10"}
-                    </button>
-                  </div>
-                )}
+                {pageLoading && <p className="text-center text-sm text-[#c8bbb2]">Загрузка...</p>}
               </>
             )}
           </>

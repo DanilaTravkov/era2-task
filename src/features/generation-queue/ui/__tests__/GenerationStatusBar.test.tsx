@@ -127,4 +127,17 @@ describe("GenerationStatusBar", () => {
     fireEvent.click(link);
     expect(window.location.pathname).toBe("/queue");
   });
+
+  it("allows the user to close the active generations panel", () => {
+    renderWithQueue([
+      task({ id: "running", status: "running", type: "text", model: "GPT-4o", progress: 30 }),
+      task({ id: "queued", status: "queued", type: "image", model: "FLUX Pro", progress: 0 }),
+    ]);
+
+    const bar = screen.getByRole("complementary");
+    fireEvent.click(within(bar).getByRole("button", { name: "Закрыть уведомление о генерациях" }));
+
+    expect(screen.queryByRole("complementary")).toBeNull();
+    expect(window.location.pathname).toBe("/");
+  });
 });

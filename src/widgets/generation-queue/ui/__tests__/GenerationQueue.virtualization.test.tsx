@@ -34,27 +34,34 @@ describe("GenerationQueue virtualized mock pages", () => {
     queueTasks.current = [];
   });
 
-  it("renders tasks in mock request pages of 10", async () => {
+  it("renders 21 tasks in scroll-loaded mock request pages of 7", async () => {
     vi.useFakeTimers();
-    queueTasks.current = Array.from({ length: 23 }, (_, index) => task(index + 1));
+    queueTasks.current = Array.from({ length: 21 }, (_, index) => task(index + 1));
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 900 });
+    Object.defineProperty(window, "scrollY", { configurable: true, value: 900 });
+    Object.defineProperty(document.documentElement, "scrollHeight", { configurable: true, value: 1700 });
 
     render(<GenerationQueue />);
 
-    expect(screen.getByText("10 / 23")).toBeTruthy();
-    expect(screen.queryAllByText("Очередь 13")).toHaveLength(0);
+    expect(screen.getByText("7 / 21")).toBeTruthy();
+    expect(screen.queryAllByText("Очередь 14")).toHaveLength(0);
 
-    fireEvent.click(screen.getByRole("button", { name: "Показать ещё 10" }));
-    await act(async () => vi.advanceTimersByTime(300));
+    await act(async () => {
+      fireEvent.scroll(window);
+      vi.advanceTimersByTime(300);
+    });
 
-    expect(screen.getByText("20 / 23")).toBeTruthy();
-    expect(screen.queryAllByText("Очередь 13").length).toBeGreaterThan(0);
-    expect(screen.queryAllByText("Очередь 03")).toHaveLength(0);
+    expect(screen.getByText("14 / 21")).toBeTruthy();
+    expect(screen.queryAllByText("Очередь 14").length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("Очередь 07")).toHaveLength(0);
 
-    fireEvent.click(screen.getByRole("button", { name: "Показать ещё 10" }));
-    await act(async () => vi.advanceTimersByTime(300));
+    await act(async () => {
+      fireEvent.scroll(window);
+      vi.advanceTimersByTime(300);
+    });
 
-    expect(screen.getByText("23 / 23")).toBeTruthy();
-    expect(screen.queryAllByText("Очередь 03").length).toBeGreaterThan(0);
-    expect(screen.queryByRole("button", { name: "Показать ещё 10" })).toBeNull();
+    expect(screen.getByText("21 / 21")).toBeTruthy();
+    expect(screen.queryAllByText("Очередь 07").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Загрузка...")).toBeNull();
   });
 });

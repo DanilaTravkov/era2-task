@@ -19,9 +19,8 @@ function countBy<T extends string>(values: T[]): Record<T, number> {
 }
 
 describe("generationTaskSeed", () => {
-  it("contains 8-12 scaffold tasks for the initial queue screen", () => {
-    expect(generationTaskSeed.length).toBeGreaterThanOrEqual(8);
-    expect(generationTaskSeed.length).toBeLessThanOrEqual(12);
+  it("contains 21 scaffold tasks for the virtualized queue demo", () => {
+    expect(generationTaskSeed).toHaveLength(21);
   });
 
   it("covers every generation type required by the domain", () => {
