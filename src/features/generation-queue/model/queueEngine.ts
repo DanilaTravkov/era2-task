@@ -3,7 +3,7 @@ import type { Dispatch } from "react";
 import type { GenerationTask } from "@/entities/generation-task";
 import type { QueueAction, QueueTickUpdate } from "./types";
 
-export const QUEUE_TICK_MS = 550;
+export const QUEUE_TICK_MS = 900;
 
 const FAILURE_ERRORS = [
   "Недостаточно кредитов",
@@ -12,10 +12,10 @@ const FAILURE_ERRORS = [
 ] as const;
 
 const STEP_BY_TYPE: Record<GenerationTask["type"], { min: number; max: number }> = {
-  text: { min: 10, max: 18 },
-  image: { min: 7, max: 13 },
-  audio: { min: 3, max: 6 },
-  video: { min: 2, max: 5 },
+  text: { min: 3, max: 6 },
+  image: { min: 2, max: 5 },
+  audio: { min: 2, max: 4 },
+  video: { min: 1, max: 3 },
 };
 
 const pickError = () => FAILURE_ERRORS[Math.floor(Math.random() * FAILURE_ERRORS.length)] ?? FAILURE_ERRORS[0];

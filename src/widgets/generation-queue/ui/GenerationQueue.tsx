@@ -1,21 +1,36 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { GenerationTask } from "@/entities/generation-task";
 import { EmptyState, ErrorState, LoadingState, QueueStats, QueueToolbar, TaskCard, TaskRow, selectQueueStats, selectVisibleTasks, useQueue, type QueueControls } from "@/features/generation-queue";
 import { Checkbox } from "@/shared/ui/checkbox";
 
 const SKIP_DELETE_CONFIRM_KEY = "era2:generation-queue:skip-delete-confirm";
+const MOCK_QUEUE_PAGE_SIZE = 10;
+const MOCK_QUEUE_REQUEST_MS = 300;
 const shortTaskDescription = (task: GenerationTask) => task.prompt.split(":")[0]?.trim() || task.prompt;
+
+function requestMockQueuePage(currentCount: number, totalCount: number) {
+  return new Promise<number>((resolve) => {
+    window.setTimeout(
+      () => resolve(Math.min(currentCount + MOCK_QUEUE_PAGE_SIZE, totalCount)),
+      MOCK_QUEUE_REQUEST_MS,
+    );
+  });
+}
 
 export function GenerationQueue() {
   const { state, cancelTask, retryTask, deleteTask, retryInitialLoad } = useQueue();
   const [controls, setControls] = useState<QueueControls>({ status: "all", sort: "newest", search: "" });
   const [pendingDelete, setPendingDelete] = useState<GenerationTask | null>(null);
+  const [renderedCount, setRenderedCount] = useState(MOCK_QUEUE_PAGE_SIZE);
+  const [pageLoading, setPageLoading] = useState(false);
   const [skipDeleteConfirm, setSkipDeleteConfirm] = useState(
     () => window.localStorage.getItem(SKIP_DELETE_CONFIRM_KEY) === "true",
   );
   const stats = useMemo(() => selectQueueStats(state.tasks), [state.tasks]);
   const visibleTasks = useMemo(() => selectVisibleTasks(state.tasks, controls), [controls, state.tasks]);
+  const renderedTasks = useMemo(() => visibleTasks.slice(0, renderedCount), [renderedCount, visibleTasks]);
   const emptyVariant = state.tasks.length === 0 ? "queue" : "results";
+  const canLoadMore = renderedTasks.length < visibleTasks.length;
   const queuePositions = useMemo(() => {
     const positions = new Map<string, number>();
     state.tasks
@@ -28,6 +43,13 @@ export function GenerationQueue() {
     if (skipDeleteConfirm) deleteTask(task.id);
     else setPendingDelete(task);
   };
+  const loadNextPage = useCallback(async () => {
+    if (pageLoading || !canLoadMore) return;
+    setPageLoading(true);
+    const nextCount = await requestMockQueuePage(renderedTasks.length, visibleTasks.length);
+    setRenderedCount(nextCount);
+    setPageLoading(false);
+  }, [canLoadMore, pageLoading, renderedTasks.length, visibleTasks.length]);
   const confirmDelete = (task: GenerationTask, remember: boolean) => {
     if (remember) {
       window.localStorage.setItem(SKIP_DELETE_CONFIRM_KEY, "true");
@@ -36,6 +58,10 @@ export function GenerationQueue() {
     deleteTask(task.id);
     setPendingDelete(null);
   };
+  useEffect(() => {
+    setRenderedCount(Math.min(MOCK_QUEUE_PAGE_SIZE, visibleTasks.length));
+    setPageLoading(false);
+  }, [controls.search, controls.sort, controls.status, visibleTasks.length]);
   return (
     <section className="min-h-screen bg-[#0e0b0a] px-3 py-6 text-[#f6efe9] sm:px-6 sm:py-8 lg:px-10">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 sm:gap-6">
@@ -62,20 +88,32 @@ export function GenerationQueue() {
                   <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-sm text-[#c8bbb2]">
                     <span>Задачи</span>
                     <span className="font-mono">
-                      {visibleTasks.length} / {state.tasks.length}
+                      {renderedTasks.length} / {visibleTasks.length}
                     </span>
                   </div>
                   <div className="hidden lg:block">
-                    {visibleTasks.map((task) => (
+                    {renderedTasks.map((task) => (
                       <TaskRow key={task.id} task={task} queuePosition={queuePositions.get(task.id)} onCancel={cancelTask} onRetry={retryTask} onDelete={requestDelete} />
                     ))}
                   </div>
                 </div>
                 <div className="grid gap-3 lg:hidden">
-                  {visibleTasks.map((task) => (
+                  {renderedTasks.map((task) => (
                     <TaskCard key={task.id} task={task} queuePosition={queuePositions.get(task.id)} onCancel={cancelTask} onRetry={retryTask} onDelete={requestDelete} />
                   ))}
                 </div>
+                {canLoadMore && (
+                  <div className="flex justify-center">
+                    <button
+                      type="button"
+                      onClick={loadNextPage}
+                      disabled={pageLoading}
+                      className="queue-focus rounded-md border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-[#f6efe9] hover:border-[#e85420]/40 disabled:cursor-wait disabled:opacity-60"
+                    >
+                      {pageLoading ? "Загрузка..." : "Показать ещё 10"}
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </>

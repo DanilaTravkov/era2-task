@@ -97,6 +97,28 @@ describe("QueueProvider persistence", () => {
     expect(stored().length).toBeGreaterThan(6);
   });
 
+  it("reactivates stale completed seed tasks for the live demo flow", async () => {
+    vi.useFakeTimers();
+    localStorage.setItem(
+      key,
+      JSON.stringify(
+        Array.from({ length: 8 }, (_, index) =>
+          task({
+            id: `gen-100${index + 1}`,
+            status: "done",
+            progress: 100,
+            createdAt: `2026-06-24T09:0${index}:00.000Z`,
+          }),
+        ),
+      ),
+    );
+
+    render(<QueueProvider><Probe /></QueueProvider>);
+
+    await advance(600);
+    expect(activeCount(screen.getByLabelText("ids").textContent ?? "")).toBeGreaterThan(6);
+  });
+
   it("shows a controlled init error and retries successfully", async () => {
     vi.useFakeTimers();
     render(<QueueProvider initialLoadShouldFail><Probe /></QueueProvider>);

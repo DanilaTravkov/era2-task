@@ -23,15 +23,26 @@ const isActiveTask = (task: GenerationTask) => task.status === "queued" || task.
 
 function withMinimumActiveTasks(tasks: GenerationTask[]) {
   const next = tasks.map((task) => ({ ...task }));
-  const existingIds = new Set(next.map((task) => task.id));
-  const missingActiveSeeds = cloneSeedTasks().filter((task) => isActiveTask(task) && !existingIds.has(task.id));
+  const activeSeeds = cloneSeedTasks().filter(isActiveTask);
 
-  for (const task of missingActiveSeeds) {
+  for (const seed of activeSeeds) {
     if (next.filter(isActiveTask).length >= MIN_ACTIVE_QUEUE_TASKS) break;
-    next.push(task);
+
+    const existingIndex = next.findIndex((task) => task.id === seed.id);
+    if (existingIndex === -1) {
+      next.push(seed);
+    } else if (!isActiveTask(next[existingIndex])) {
+      next[existingIndex] = seed;
+    }
   }
 
-  return next;
+  if (next.filter(isActiveTask).length >= MIN_ACTIVE_QUEUE_TASKS) return next;
+
+  const existingIds = new Set(next.map((task) => task.id));
+  return [
+    ...next,
+    ...activeSeeds.filter((task) => !existingIds.has(task.id)).slice(0, MIN_ACTIVE_QUEUE_TASKS),
+  ];
 }
 
 function readStoredTasks(): GenerationTask[] | null {
