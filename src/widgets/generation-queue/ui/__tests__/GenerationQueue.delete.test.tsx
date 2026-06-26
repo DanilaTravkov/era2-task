@@ -20,7 +20,7 @@ const task = (overrides: Partial<GenerationTask> = {}): GenerationTask => ({
   id: "delete-me",
   type: "image",
   model: "FLUX Pro",
-  prompt: "Минималистичный постер ERA2",
+  prompt: "Минималистичный постер ERA2: технические детали не показываются в модальном окне",
   status: "queued",
   progress: 0,
   createdAt: "2026-06-24T09:00:00.000Z",
@@ -41,7 +41,9 @@ describe("GenerationQueue delete confirmation", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Удалить" })[0]);
     const dialog = screen.getByRole("dialog");
     expect(dialog).toBeTruthy();
-    expect(screen.getByText('Вы уверены что хотите удалить задачу "Минималистичный постер ERA2"?')).toBeTruthy();
+    expect(within(dialog).getByRole("heading", { level: 3, name: "FLUX Pro" })).toBeTruthy();
+    expect(within(dialog).getByText("Минималистичный постер ERA2")).toBeTruthy();
+    expect(within(dialog).queryByText(/технические детали/i)).toBeNull();
 
     fireEvent.click(screen.getByRole("checkbox", { name: "Больше не спрашивать" }));
     fireEvent.click(within(dialog).getByRole("button", { name: "Удалить" }));

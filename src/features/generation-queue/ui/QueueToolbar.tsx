@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import type { QueueControls, QueueSort, QueueStatusFilter } from "../model/types";
 
 const statuses: { value: QueueStatusFilter; label: string }[] = [
@@ -43,15 +44,21 @@ export function QueueToolbar({
           </button>
         ))}
       </div>
-      <select
+      <Select
         value={controls.sort}
-        onChange={(event) => onControlsChange({ ...controls, sort: event.target.value as QueueSort })}
-        className="queue-focus rounded-md border border-white/10 bg-[#0e0b0a] px-3 py-2 text-sm text-[#f6efe9]"
-        aria-label="Сортировка"
+        onValueChange={(sort) => onControlsChange({ ...controls, sort: sort as QueueSort })}
       >
-        <option value="newest">Сначала новые</option>
-        <option value="oldest">Сначала старые</option>
-      </select>
+        <SelectTrigger
+          aria-label="Сортировка"
+          className="queue-focus h-auto border-white/10 bg-[#0e0b0a] px-3 py-2 text-sm text-[#f6efe9] shadow-none"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="border-white/10 bg-[#141110] text-[#f6efe9]">
+          <SelectItem value="newest" className="focus:bg-[#e85420]/20 focus:text-white">Сначала новые</SelectItem>
+          <SelectItem value="oldest" className="focus:bg-[#e85420]/20 focus:text-white">Сначала старые</SelectItem>
+        </SelectContent>
+      </Select>
       <input
         value={search}
         onChange={(event) => setSearch(event.target.value)}

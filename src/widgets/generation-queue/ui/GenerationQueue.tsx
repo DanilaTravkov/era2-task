@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 import type { GenerationTask } from "@/entities/generation-task";
 import { EmptyState, ErrorState, LoadingState, QueueStats, QueueToolbar, TaskCard, TaskRow, selectQueueStats, selectVisibleTasks, useQueue, type QueueControls } from "@/features/generation-queue";
+import { Checkbox } from "@/shared/ui/checkbox";
 
 const SKIP_DELETE_CONFIRM_KEY = "era2:generation-queue:skip-delete-confirm";
+const shortTaskDescription = (task: GenerationTask) => task.prompt.split(":")[0]?.trim() || task.prompt;
 
 export function GenerationQueue() {
   const { state, cancelTask, retryTask, deleteTask, retryInitialLoad } = useQueue();
@@ -103,14 +105,17 @@ function DeleteTaskDialog({
   return (
     <div className="fixed inset-0 z-[60] grid place-items-center bg-black/60 px-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="delete-task-title">
       <div className="queue-panel w-full max-w-md rounded-lg p-5">
-        <h2 id="delete-task-title" className="text-lg font-semibold">Удалить задачу?</h2>
-        <p className="mt-3 text-sm leading-6 text-[#c8bbb2]">
-          Вы уверены что хотите удалить задачу "{task.prompt}"?
-        </p>
-        <label className="mt-4 flex items-center gap-3 text-sm text-[#d8ccc4]">
-          <input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} className="size-4 accent-[#e85420]" />
-          Больше не спрашивать
-        </label>
+        <h3 id="delete-task-title" className="text-lg font-semibold">{task.model}</h3>
+        <p className="mt-2 text-sm leading-6 text-[#c8bbb2]">{shortTaskDescription(task)}</p>
+        <div className="mt-4 flex items-center gap-3 text-sm text-[#d8ccc4]">
+          <Checkbox
+            id="skip-delete-confirm"
+            checked={remember}
+            onCheckedChange={(checked) => setRemember(checked === true)}
+            className="border-[#e85420]/70 bg-[#0e0b0a] text-white data-[state=checked]:bg-[#e85420]"
+          />
+          <label htmlFor="skip-delete-confirm">Больше не спрашивать</label>
+        </div>
         <div className="mt-5 flex justify-end gap-3">
           <button type="button" onClick={onCancel} className="queue-focus rounded-md border border-white/10 px-4 py-2 text-sm text-[#c8bbb2] hover:border-[#e85420]/40">
             Отмена

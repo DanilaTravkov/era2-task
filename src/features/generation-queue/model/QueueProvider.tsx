@@ -8,6 +8,7 @@ import type { QueueAction, QueueState } from "./types";
 
 const QUEUE_STORAGE_KEY = "era2:generation-queue:v1";
 const HYDRATION_DELAY_MS = 600;
+const MIN_ACTIVE_QUEUE_TASKS = 8;
 
 export interface QueueContextValue {
   state: QueueState;
@@ -18,6 +19,20 @@ export interface QueueContextValue {
 export const QueueContext = createContext<QueueContextValue | null>(null);
 
 const cloneSeedTasks = () => generationTaskSeed.map((task) => ({ ...task }));
+const isActiveTask = (task: GenerationTask) => task.status === "queued" || task.status === "running";
+
+function withMinimumActiveTasks(tasks: GenerationTask[]) {
+  const next = tasks.map((task) => ({ ...task }));
+  const existingIds = new Set(next.map((task) => task.id));
+  const missingActiveSeeds = cloneSeedTasks().filter((task) => isActiveTask(task) && !existingIds.has(task.id));
+
+  for (const task of missingActiveSeeds) {
+    if (next.filter(isActiveTask).length >= MIN_ACTIVE_QUEUE_TASKS) break;
+    next.push(task);
+  }
+
+  return next;
+}
 
 function readStoredTasks(): GenerationTask[] | null {
   try {
@@ -33,7 +48,9 @@ function readStoredTasks(): GenerationTask[] | null {
 function persistTasks(tasks: GenerationTask[]) {
   try {
     window.localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(tasks));
-  } catch {}
+  } catch {
+    // localStorage can be unavailable in restricted browser modes.
+  }
 }
 
 export interface QueueProviderProps extends PropsWithChildren {
@@ -56,7 +73,7 @@ export function QueueProvider({ children, initialLoadShouldFail = false }: Queue
       }
       dispatch({
         type: "queue/load-success",
-        tasks: readStoredTasks() ?? cloneSeedTasks(),
+        tasks: withMinimumActiveTasks(readStoredTasks() ?? cloneSeedTasks()),
         now: new Date().toISOString(),
       });
     }, HYDRATION_DELAY_MS);

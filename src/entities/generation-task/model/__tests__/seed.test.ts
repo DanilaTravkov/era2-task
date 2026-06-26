@@ -35,6 +35,7 @@ describe("generationTaskSeed", () => {
 
     expect(statusCounts.running).toBe(REQUIRED_STATUS_COUNTS.running);
     expect(statusCounts.queued).toBeGreaterThanOrEqual(3);
+    expect((statusCounts.running ?? 0) + (statusCounts.queued ?? 0)).toBeGreaterThanOrEqual(8);
     expect(statusCounts.done).toBeGreaterThanOrEqual(1);
     expect(statusCounts.failed).toBeGreaterThanOrEqual(1);
   });

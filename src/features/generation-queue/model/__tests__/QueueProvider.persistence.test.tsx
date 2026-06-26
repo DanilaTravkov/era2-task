@@ -26,6 +26,8 @@ const task = (overrides: Partial<GenerationTask> = {}): GenerationTask => ({
 });
 const advance = async (ms: number) => act(async () => vi.advanceTimersByTime(ms));
 const stored = () => JSON.parse(localStorage.getItem(key) ?? "[]") as GenerationTask[];
+const activeCount = (ids: string) =>
+  ids.split(",").filter((item) => item.endsWith(":queued") || item.endsWith(":running")).length;
 
 function Probe() {
   const queue = useQueue();
@@ -82,6 +84,17 @@ describe("QueueProvider persistence", () => {
     await advance(1);
     fireEvent.click(screen.getByRole("button", { name: "cancel" }));
     expect(stored().find((item) => item.id === "persist-a")?.status).toBe("canceled");
+  });
+
+  it("tops up stale persisted queues to more than six active tasks", async () => {
+    vi.useFakeTimers();
+    localStorage.setItem(key, JSON.stringify([task({ id: "persist-a", status: "running" })]));
+
+    render(<QueueProvider><Probe /></QueueProvider>);
+
+    await advance(600);
+    expect(activeCount(screen.getByLabelText("ids").textContent ?? "")).toBeGreaterThan(6);
+    expect(stored().length).toBeGreaterThan(6);
   });
 
   it("shows a controlled init error and retries successfully", async () => {
