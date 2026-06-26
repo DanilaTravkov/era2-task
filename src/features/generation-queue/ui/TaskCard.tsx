@@ -24,9 +24,9 @@ export function TaskCard({ task, queuePosition, onCancel, onRetry, onDelete }: T
   ].filter(Boolean);
 
   return (
-    <article className="rounded-lg border border-white/10 bg-[#211a16] p-4">
+    <article className="queue-panel rounded-lg p-4 transition-colors duration-200 hover:border-[#e85420]/25 sm:p-5">
       <div className="flex items-start gap-3">
-        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg border border-white/10 bg-[#17120f] text-[#e85420]">
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg border border-[#3a2f29] bg-[#141110] text-[#e85420] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
           <Icon className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
@@ -35,9 +35,9 @@ export function TaskCard({ task, queuePosition, onCancel, onRetry, onDelete }: T
             <StatusBadge status={task.status} />
           </div>
           <div className="mt-3 flex flex-wrap gap-2 text-xs text-[#9f9188]">
-            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 font-mono text-[#d8ccc4]">{task.model}</span>
+            <span className="rounded-full border border-white/10 bg-[#0e0b0a]/60 px-2 py-1 font-mono text-[#d8ccc4]">{task.model}</span>
             {meta.map((item) => (
-              <span key={item} className="rounded-full bg-white/[0.04] px-2 py-1">
+              <span key={item} className="rounded-full bg-white/[0.05] px-2 py-1">
                 {item}
               </span>
             ))}

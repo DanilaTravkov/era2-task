@@ -10,7 +10,7 @@ interface TaskActionsProps {
 }
 
 const buttonClass =
-  "inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-[#c8bbb2] hover:border-[#e85420]/50 hover:text-[#f6f0eb]";
+  "queue-focus inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-[#c8bbb2] hover:-translate-y-0.5 hover:border-[#e85420]/50 hover:bg-[#e85420]/10 hover:text-[#f6efe9]";
 
 export function TaskActions({ status, onCancel, onRetry, onDelete, onDownload }: TaskActionsProps) {
   const primary: false | { label: string; Icon: LucideIcon; onClick?: () => void } =

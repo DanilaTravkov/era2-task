@@ -27,16 +27,16 @@ export function QueueToolbar({
   }, [controls, onControlsChange, search]);
 
   return (
-    <div className="grid gap-3 rounded-lg border border-white/10 bg-[#211a16] p-3 lg:grid-cols-[1fr_180px_260px]">
-      <div className="flex gap-2 overflow-x-auto">
+    <div className="queue-panel grid gap-3 rounded-lg p-3 sm:p-4 lg:grid-cols-[1fr_180px_260px]">
+      <div className="queue-scrollbar flex gap-2 overflow-x-auto pb-1">
         {statuses.map((item) => (
           <button
             key={item.value}
             type="button"
             aria-pressed={controls.status === item.value}
             onClick={() => onControlsChange({ ...controls, status: item.value })}
-            className={`shrink-0 rounded-full border px-3 py-2 text-sm ${
-              controls.status === item.value ? "border-[#e85420] bg-[#e85420]" : "border-white/10 text-[#c8bbb2]"
+            className={`queue-focus shrink-0 rounded-full border px-3 py-2 text-sm ${
+              controls.status === item.value ? "border-[#e85420] bg-[#e85420] text-white shadow-[0_10px_28px_-18px_rgba(232,84,32,0.9)]" : "border-white/10 bg-white/[0.03] text-[#c8bbb2] hover:border-[#e85420]/40 hover:bg-[#e85420]/10"
             }`}
           >
             {item.label}
@@ -46,7 +46,7 @@ export function QueueToolbar({
       <select
         value={controls.sort}
         onChange={(event) => onControlsChange({ ...controls, sort: event.target.value as QueueSort })}
-        className="rounded-md border border-white/10 bg-[#17120f] px-3 py-2 text-sm"
+        className="queue-focus rounded-md border border-white/10 bg-[#0e0b0a] px-3 py-2 text-sm text-[#f6efe9]"
         aria-label="Сортировка"
       >
         <option value="newest">Сначала новые</option>
@@ -56,7 +56,7 @@ export function QueueToolbar({
         value={search}
         onChange={(event) => setSearch(event.target.value)}
         placeholder="Поиск по промпту"
-        className="rounded-md border border-white/10 bg-[#17120f] px-3 py-2 text-sm"
+        className="queue-focus rounded-md border border-white/10 bg-[#0e0b0a] px-3 py-2 text-sm text-[#f6efe9] placeholder:text-[#8a7f78]"
       />
     </div>
   );

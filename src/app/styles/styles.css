@@ -38,8 +38,8 @@
   --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-ring: hsl(var(--sidebar-ring));
-  --font-sans: "Geist Variable", "Manrope", -apple-system, system-ui, sans-serif;
-  --font-mono: "Geist Mono Variable", "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "Geist Variable", "Inter", -apple-system, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
   --font-heading: var(--font-sans);
 }
 
@@ -302,6 +302,37 @@
   }
   .rounded-button {
     border-radius: 8px;
+  }
+
+  .queue-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(232, 84, 32, 0.45) transparent;
+  }
+  .queue-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+  .queue-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .queue-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(232, 84, 32, 0.45);
+    border-radius: 999px;
+  }
+
+  .queue-focus {
+    outline: none;
+    transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, color 180ms ease, transform 180ms ease;
+  }
+  .queue-focus:focus-visible {
+    border-color: #E85420;
+    box-shadow: 0 0 0 3px rgba(232, 84, 32, 0.22);
+  }
+
+  .queue-panel {
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: linear-gradient(180deg, rgba(34, 28, 25, 0.98), rgba(20, 17, 16, 0.98));
+    box-shadow: 0 24px 70px -46px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  }
+
+  .queue-progress-fill {
+    background: linear-gradient(90deg, #E85420 0%, #ff7a3d 56%, #ffb27a 100%);
+    box-shadow: 0 0 18px rgba(232, 84, 32, 0.35);
   }
 }
 

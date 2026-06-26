@@ -24,15 +24,15 @@ export function TaskRow({ task, queuePosition, onCancel, onRetry, onDelete }: Ta
   ].filter(Boolean);
 
   return (
-    <article className="grid grid-cols-[minmax(0,1fr)_132px_180px_132px] items-center gap-4 border-b border-white/10 px-4 py-4 last:border-b-0">
+    <article className="grid grid-cols-[minmax(0,1fr)_132px_180px_132px] items-center gap-4 border-b border-white/10 px-4 py-4 transition-colors duration-200 last:border-b-0 hover:bg-white/[0.035]">
       <div className="flex min-w-0 items-center gap-3">
-        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg border border-white/10 bg-[#17120f] text-[#e85420]">
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg border border-[#3a2f29] bg-[#141110] text-[#e85420] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
           <Icon className="h-5 w-5" />
         </div>
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-[#f6f0eb]">{task.prompt}</p>
           <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-xs text-[#9f9188]">
-            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 font-mono text-[#d8ccc4]">{task.model}</span>
+            <span className="rounded-full border border-white/10 bg-[#0e0b0a]/60 px-2 py-1 font-mono text-[#d8ccc4]">{task.model}</span>
             {meta.map((item) => (
               <span key={item}>{item}</span>
             ))}
@@ -41,7 +41,7 @@ export function TaskRow({ task, queuePosition, onCancel, onRetry, onDelete }: Ta
         </div>
       </div>
       <StatusBadge status={task.status} />
-      {task.status === "running" ? <ProgressBar value={task.progress} /> : <span className="text-sm text-[#8f8178]">-</span>}
+      {task.status === "running" ? <ProgressBar value={task.progress} /> : <span className="text-sm text-[#8a7f78]">-</span>}
       <TaskActions status={task.status} onCancel={() => onCancel(task.id)} onRetry={() => onRetry(task.id)} onDelete={() => onDelete(task.id)} />
     </article>
   );

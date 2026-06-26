@@ -16,9 +16,9 @@ export function GenerationQueue() {
     return positions;
   }, [state.tasks]);
   return (
-    <section className="min-h-screen bg-[#17120f] px-4 py-8 text-[#f6f0eb] sm:px-6 lg:px-10">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-        <header className="flex flex-col gap-2">
+    <section className="min-h-screen bg-[#0e0b0a] px-3 py-6 text-[#f6efe9] sm:px-6 sm:py-8 lg:px-10">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 sm:gap-6">
+        <header className="flex flex-col gap-2 rounded-lg border border-white/[0.07] bg-[#141110]/70 p-4 sm:p-5">
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#e85420]">ERA2</p>
           <h1 className="text-3xl font-semibold sm:text-4xl">Очередь генераций</h1>
           <p className="max-w-2xl text-sm leading-6 text-[#c8bbb2] sm:text-base">
@@ -37,7 +37,7 @@ export function GenerationQueue() {
               <EmptyState variant={emptyVariant} />
             ) : (
               <>
-                <div className="overflow-hidden rounded-lg border border-white/10 bg-[#211a16]">
+                <div className="queue-panel overflow-hidden rounded-lg">
                   <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-sm text-[#c8bbb2]">
                     <span>Задачи</span>
                     <span className="font-mono">

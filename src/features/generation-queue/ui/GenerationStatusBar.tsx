@@ -22,7 +22,7 @@ function getAverageProgress(tasks: GenerationTask[]) {
 function TaskSummary({ task }: { task: GenerationTask }) {
   return (
     <div className="flex min-w-0 items-center gap-3">
-      <span className="h-2 w-2 shrink-0 rounded-full bg-[#e85420]" />
+      <span className="h-2 w-2 shrink-0 rounded-full bg-[#e85420] shadow-[0_0_16px_rgba(232,84,32,0.55)]" />
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center justify-between gap-3 text-xs">
           <span className="truncate font-medium text-[#f6f0eb]">
@@ -30,8 +30,8 @@ function TaskSummary({ task }: { task: GenerationTask }) {
           </span>
           <span className="shrink-0 font-mono text-[#c8bbb2]">{Math.round(task.progress)}%</span>
         </div>
-        <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/10">
-          <div className="h-full rounded-full bg-[#e85420] transition-[width] duration-300" style={{ width: `${Math.max(0, Math.min(100, task.progress))}%` }} />
+        <div className="mt-1 h-1 overflow-hidden rounded-full bg-[#0e0b0a] ring-1 ring-white/10">
+          <div className="queue-progress-fill h-full rounded-full transition-[width] duration-500 ease-out" style={{ width: `${Math.max(0, Math.min(100, task.progress))}%` }} />
         </div>
       </div>
     </div>
@@ -43,7 +43,7 @@ function OneTaskStatus({ task }: { task: GenerationTask }) {
     <Link
       to="/queue"
       aria-label="Открыть очередь генераций"
-      className="flex w-full items-center gap-3 rounded-lg border border-white/10 bg-[#211a16]/95 px-4 py-3 text-left shadow-2xl shadow-black/30 backdrop-blur transition hover:border-[#e85420]/40 sm:w-[360px]"
+      className="queue-panel flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-[#e85420]/40 sm:w-[360px]"
     >
       <Loader2 className="h-5 w-5 shrink-0 animate-spin text-[#e85420]" aria-hidden="true" />
       <div className="min-w-0 flex-1">
@@ -60,7 +60,7 @@ function OneTaskStatus({ task }: { task: GenerationTask }) {
 
 function MultiTaskStatus({ tasks, averageProgress }: { tasks: GenerationTask[]; averageProgress: number }) {
   return (
-    <div className="w-full rounded-lg border border-white/10 bg-[#211a16]/95 p-4 shadow-2xl shadow-black/30 backdrop-blur sm:w-[390px]">
+    <div className="queue-panel w-full rounded-lg p-4 backdrop-blur transition duration-200 sm:w-[390px]">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-sm font-semibold text-[#f6f0eb]">Генерации идут</h2>
@@ -80,7 +80,7 @@ function MultiTaskStatus({ tasks, averageProgress }: { tasks: GenerationTask[]; 
       </div>
       <Link
         to="/queue"
-        className="mt-4 inline-flex w-full items-center justify-center rounded-md bg-[#e85420] px-3 py-2 text-sm font-medium text-white transition hover:bg-[#ff6a35]"
+        className="queue-focus mt-4 inline-flex w-full items-center justify-center rounded-md border border-[#e85420] bg-[#e85420] px-3 py-2 text-sm font-medium text-white hover:-translate-y-0.5 hover:bg-[#ff6a35]"
       >
         Открыть очередь →
       </Link>
@@ -96,7 +96,7 @@ export function GenerationStatusBar() {
   if (!state.hydrated || state.loading || state.error || activeTasks.length === 0) return null;
 
   return (
-    <aside className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:inset-x-auto sm:right-6 sm:bottom-6 sm:px-0 sm:pb-0">
+    <aside className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(12px+env(safe-area-inset-bottom))] transition-[opacity,transform] duration-300 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:px-0 sm:pb-0">
       {activeTasks.length === 1 ? (
         <OneTaskStatus task={activeTasks[0]} />
       ) : (
