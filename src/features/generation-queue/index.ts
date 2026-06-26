@@ -3,6 +3,7 @@ export { QueueProvider } from "./model/QueueProvider";
 export { QUEUE_TICK_MS, buildQueueTick, useQueueEngine } from "./model/queueEngine";
 export { selectActiveTasks, selectQueueStats, selectVisibleTasks } from "./model/selectors";
 export { useQueue } from "./model/useQueue";
+export { GenerationFaviconStatus } from "./ui/GenerationFaviconStatus";
 export { GenerationStatusBar } from "./ui/GenerationStatusBar";
 export { ProgressBar } from "./ui/ProgressBar";
 export { QueueStats } from "./ui/QueueStats";

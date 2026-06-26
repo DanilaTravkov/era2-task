@@ -6,7 +6,7 @@ import { OnboardingTour } from "@/features/onboarding";
 import { CopyToastProvider } from "@/features/copy-toast";
 import { DailyCheckIn } from "@/features/promo";
 import { CornerPromo } from "@/features/promo";
-import { GenerationStatusBar } from "@/features/generation-queue";
+import { GenerationFaviconStatus, GenerationStatusBar } from "@/features/generation-queue";
 
 export default function App() {
   return (
@@ -21,6 +21,7 @@ export default function App() {
       <DailyCheckIn />
       <CornerPromo />
       <GenerationStatusBar />
+      <GenerationFaviconStatus />
     </AppProviders>
   );
 }
