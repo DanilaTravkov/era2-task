@@ -114,7 +114,7 @@ describe("GenerationStatusBar", () => {
     ]);
 
     const bar = screen.getByRole("complementary");
-    expect(within(bar).getByText("Генерации идут")).toBeTruthy();
+    expect(within(bar).getByText("Генерации в процессе")).toBeTruthy();
     expect(within(bar).getByText("4 активны · 55%")).toBeTruthy();
     expect(within(bar).getByRole("progressbar").getAttribute("aria-valuenow")).toBe("55");
     expect(within(bar).getByText("Видео · Runway")).toBeTruthy();

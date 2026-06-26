@@ -44,7 +44,7 @@ function DismissButton({ onDismiss }: { onDismiss: () => void }) {
       type="button"
       aria-label="Закрыть уведомление о генерациях"
       onClick={onDismiss}
-      className="queue-focus absolute right-3 top-3 rounded-md border border-white/10 bg-[#0e0b0a]/70 p-1.5 text-[#c8bbb2] hover:border-[#e85420]/40 hover:text-white"
+      className="queue-focus rounded-md border border-white/10 bg-[#0e0b0a]/70 p-1.5 text-[#c8bbb2] hover:border-[#e85420]/40 hover:text-white"
     >
       <X className="h-4 w-4" aria-hidden="true" />
     </button>
@@ -72,17 +72,19 @@ function OneTaskStatus({ task, onDismiss }: { task: GenerationTask; onDismiss: (
 
 function MultiTaskStatus({ tasks, averageProgress, onDismiss }: { tasks: GenerationTask[]; averageProgress: number; onDismiss: () => void }) {
   return (
-    <div className="queue-panel relative w-full rounded-lg p-4 pr-12 backdrop-blur transition duration-200 sm:w-[390px]">
+    <div className="queue-panel relative w-full rounded-lg p-4 backdrop-blur transition duration-200 sm:w-[390px]">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-[#f6f0eb]">Генерации идут</h2>
+          <h2 className="text-sm font-semibold text-[#f6f0eb]">Генерации в процессе</h2>
           <p className="mt-1 text-xs text-[#c8bbb2]">
             {tasks.length} активны · {averageProgress}%
           </p>
         </div>
-        <Loader2 className="h-5 w-5 shrink-0 animate-spin text-[#e85420]" aria-hidden="true" />
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-5 w-5 shrink-0 animate-spin text-[#e85420]" aria-hidden="true" />
+          <DismissButton onDismiss={onDismiss} />
+        </div>
       </div>
-      <DismissButton onDismiss={onDismiss} />
       <div className="mt-3">
         <ProgressBar value={averageProgress} />
       </div>
