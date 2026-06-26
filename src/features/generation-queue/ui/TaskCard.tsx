@@ -10,7 +10,7 @@ interface TaskCardProps {
   queuePosition?: number;
   onCancel: (taskId: string) => void;
   onRetry: (taskId: string) => void;
-  onDelete: (taskId: string) => void;
+  onDelete: (task: GenerationTask) => void;
 }
 
 const icons: Record<GenType, LucideIcon> = { text: FileText, image: ImageIcon, video: Video, audio: Mic };
@@ -51,7 +51,7 @@ export function TaskCard({ task, queuePosition, onCancel, onRetry, onDelete }: T
       )}
       {task.status === "failed" && task.error && <p className="mt-4 text-sm text-red-200">{task.error}</p>}
       <div className="mt-4">
-        <TaskActions status={task.status} onCancel={() => onCancel(task.id)} onRetry={() => onRetry(task.id)} onDelete={() => onDelete(task.id)} />
+        <TaskActions status={task.status} onCancel={() => onCancel(task.id)} onRetry={() => onRetry(task.id)} onDelete={() => onDelete(task)} />
       </div>
     </article>
   );

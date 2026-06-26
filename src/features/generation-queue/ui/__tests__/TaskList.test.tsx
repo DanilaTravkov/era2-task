@@ -59,6 +59,6 @@ describe("generation queue task list UI", () => {
 
     expect(within(card).getByRole("button", { name: /скачать/i })).toBeTruthy();
     fireEvent.click(within(card).getByRole("button", { name: /удалить/i }));
-    expect(callbacks.onDelete).toHaveBeenCalledWith("done-task");
+    expect(callbacks.onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: "done-task" }));
   });
 });

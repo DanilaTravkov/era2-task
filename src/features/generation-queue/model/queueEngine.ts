@@ -30,7 +30,7 @@ function shouldFailTask(task: GenerationTask, nextProgress: number) {
     return nextProgress >= task.failAtProgress;
   }
 
-  return nextProgress < 100 && task.progress >= 15 && Math.random() < 0.15;
+  return task.progress < 45 && nextProgress >= 45 && Math.random() < 0.08;
 }
 
 export function buildQueueTick(tasks: GenerationTask[]): QueueTickUpdate[] {

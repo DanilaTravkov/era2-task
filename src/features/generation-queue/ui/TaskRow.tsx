@@ -10,7 +10,7 @@ interface TaskRowProps {
   queuePosition?: number;
   onCancel: (taskId: string) => void;
   onRetry: (taskId: string) => void;
-  onDelete: (taskId: string) => void;
+  onDelete: (task: GenerationTask) => void;
 }
 
 const icons: Record<GenType, LucideIcon> = { text: FileText, image: ImageIcon, video: Video, audio: Mic };
@@ -42,7 +42,7 @@ export function TaskRow({ task, queuePosition, onCancel, onRetry, onDelete }: Ta
       </div>
       <StatusBadge status={task.status} />
       {task.status === "running" ? <ProgressBar value={task.progress} /> : <span className="text-sm text-[#8a7f78]">-</span>}
-      <TaskActions status={task.status} onCancel={() => onCancel(task.id)} onRetry={() => onRetry(task.id)} onDelete={() => onDelete(task.id)} />
+      <TaskActions status={task.status} onCancel={() => onCancel(task.id)} onRetry={() => onRetry(task.id)} onDelete={() => onDelete(task)} />
     </article>
   );
 }

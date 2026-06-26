@@ -1,4 +1,4 @@
-import { Download, MoreHorizontal, RotateCcw, X, type LucideIcon } from "lucide-react";
+import { Download, RotateCcw, Trash2, X, type LucideIcon } from "lucide-react";
 import type { TaskStatus } from "@/entities/generation-task";
 
 interface TaskActionsProps {
@@ -26,7 +26,7 @@ export function TaskActions({ status, onCancel, onRetry, onDelete, onDownload }:
         </button>
       )}
       <button type="button" onClick={onDelete} className={buttonClass} aria-label="Удалить" title="Удалить">
-        <MoreHorizontal className="h-4 w-4" />
+        <Trash2 className="h-4 w-4" />
       </button>
     </div>
   );

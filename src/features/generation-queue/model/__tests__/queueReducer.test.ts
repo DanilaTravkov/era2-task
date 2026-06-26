@@ -116,7 +116,7 @@ describe("queueReducer", () => {
 
     const retried = queueReducer(canceled, { type: "queue/retry", taskId: "failed-1", now });
     expect(retried.tasks.find((item) => item.id === "failed-1")).toMatchObject({
-      status: "queued",
+      status: "running",
       progress: 0,
       error: undefined,
       createdAt: now,

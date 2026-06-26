@@ -107,20 +107,23 @@ export function queueReducer(state: QueueState, action: QueueAction): QueueState
     case "queue/retry":
       return {
         ...state,
-        tasks: state.tasks.map((task) =>
-          task.id === action.taskId && (task.status === "failed" || task.status === "canceled")
-            ? {
-                ...task,
-                status: "queued",
-                progress: 0,
-                createdAt: action.now,
-                updatedAt: action.now,
-                startedAt: undefined,
-                completedAt: undefined,
-                error: undefined,
-                failAtProgress: undefined,
-              }
-            : task,
+        tasks: fillSlots(
+          state.tasks.map((task) =>
+            task.id === action.taskId && (task.status === "failed" || task.status === "canceled")
+              ? {
+                  ...task,
+                  status: "queued",
+                  progress: 0,
+                  createdAt: action.now,
+                  updatedAt: action.now,
+                  startedAt: undefined,
+                  completedAt: undefined,
+                  error: undefined,
+                  failAtProgress: undefined,
+                }
+              : task,
+          ),
+          action.now,
         ),
       };
     case "queue/delete":

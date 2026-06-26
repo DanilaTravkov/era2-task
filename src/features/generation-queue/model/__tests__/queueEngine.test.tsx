@@ -53,6 +53,14 @@ describe("queueEngine", () => {
     });
   });
 
+  it("does not keep rolling random failures after the decision window", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    const [update] = buildQueueTick([task({ id: "safe-progress", progress: 60 })]);
+
+    expect(update?.taskId).toBe("safe-progress");
+    expect(update?.fail).toBeUndefined();
+  });
+
   it("dispatches interval ticks only while enabled and clears the interval", () => {
     vi.useFakeTimers();
     const dispatch = vi.fn<Dispatch<QueueAction>>();
