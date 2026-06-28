@@ -29,14 +29,14 @@ export function QueueToolbar({
 
   return (
     <div className="queue-panel grid gap-3 rounded-lg p-3 sm:p-4 lg:grid-cols-[1fr_180px_260px]">
-      <div className="queue-scrollbar flex gap-2 overflow-x-auto pb-1">
+      <div className="grid grid-cols-5 gap-1 sm:flex sm:gap-2">
         {statuses.map((item) => (
           <button
             key={item.value}
             type="button"
             aria-pressed={controls.status === item.value}
             onClick={() => onControlsChange({ ...controls, status: item.value })}
-            className={`queue-focus shrink-0 rounded-full border px-3 py-2 text-sm ${
+            className={`queue-focus min-w-0 whitespace-nowrap rounded-full border px-1.5 py-2 text-[11px] sm:px-3 sm:text-sm ${
               controls.status === item.value ? "border-[#e85420] bg-[#e85420] text-white shadow-[0_10px_28px_-18px_rgba(232,84,32,0.9)]" : "border-white/10 bg-white/[0.03] text-[#c8bbb2] hover:border-[#e85420]/40 hover:bg-[#e85420]/10"
             }`}
           >
