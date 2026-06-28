@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GenerationTask } from "@/entities/generation-task";
@@ -128,7 +128,7 @@ describe("GenerationStatusBar", () => {
     expect(window.location.pathname).toBe("/queue");
   });
 
-  it("allows the user to close the active generations panel", () => {
+  it("allows the user to close the active generations panel", async () => {
     renderWithQueue([
       task({ id: "running", status: "running", type: "text", model: "GPT-4o", progress: 30 }),
       task({ id: "queued", status: "queued", type: "image", model: "FLUX Pro", progress: 0 }),
@@ -137,7 +137,7 @@ describe("GenerationStatusBar", () => {
     const bar = screen.getByRole("complementary");
     fireEvent.click(within(bar).getByRole("button", { name: "Закрыть уведомление о генерациях" }));
 
-    expect(screen.queryByRole("complementary")).toBeNull();
+    await waitFor(() => expect(screen.queryByRole("complementary")).toBeNull());
     expect(window.location.pathname).toBe("/");
   });
 });

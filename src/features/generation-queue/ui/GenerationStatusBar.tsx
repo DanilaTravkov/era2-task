@@ -1,4 +1,5 @@
 import { Loader2, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import type { GenerationTask, GenType } from "@/entities/generation-task";
 import { Link } from "@/shared/routing";
@@ -108,16 +109,25 @@ export function GenerationStatusBar() {
   const [dismissed, setDismissed] = useState(false);
   const activeTasks = useMemo(() => selectActiveTasks(state.tasks), [state.tasks]);
   const averageProgress = useMemo(() => getAverageProgress(activeTasks), [activeTasks]);
-
-  if (dismissed || !state.hydrated || state.loading || state.error || activeTasks.length === 0) return null;
+  const visible = !dismissed && state.hydrated && !state.loading && !state.error && activeTasks.length > 0;
 
   return (
-    <aside className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(12px+env(safe-area-inset-bottom))] transition-[opacity,transform] duration-300 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:px-0 sm:pb-0">
-      {activeTasks.length === 1 ? (
-        <OneTaskStatus task={activeTasks[0]} onDismiss={() => setDismissed(true)} />
-      ) : (
-        <MultiTaskStatus tasks={activeTasks} averageProgress={averageProgress} onDismiss={() => setDismissed(true)} />
+    <AnimatePresence>
+      {visible && (
+        <motion.aside
+          initial={{ scale: 0.92, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.92, opacity: 0, y: 20 }}
+          transition={{ type: "spring", damping: 22, stiffness: 280 }}
+          className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:inset-x-auto sm:right-6 sm:bottom-6 sm:px-0 sm:pb-0"
+        >
+          {activeTasks.length === 1 ? (
+            <OneTaskStatus task={activeTasks[0]} onDismiss={() => setDismissed(true)} />
+          ) : (
+            <MultiTaskStatus tasks={activeTasks} averageProgress={averageProgress} onDismiss={() => setDismissed(true)} />
+          )}
+        </motion.aside>
       )}
-    </aside>
+    </AnimatePresence>
   );
 }

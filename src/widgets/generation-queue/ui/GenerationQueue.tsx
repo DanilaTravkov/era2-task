@@ -81,7 +81,7 @@ export function GenerationQueue() {
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#e85420]">ERA2</p>
           <h1 className="text-3xl font-semibold sm:text-4xl">Очередь генераций</h1>
           <p className="max-w-2xl text-sm leading-6 text-[#c8bbb2] sm:text-base">
-            Следите за текстовыми, графическими, видео- и аудиозадачами в едином списке.
+            Следите за текстовыми, графическими, видео и аудиозадачами в едином списке.
           </p>
         </header>
         {state.loading ? (
